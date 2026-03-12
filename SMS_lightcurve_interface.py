@@ -12,7 +12,7 @@ def interface_single_sms_lightcurve(Ekin_ejecta, Mass_ejecta, Radius_initial, cs
 	Radius_initial [initial radius of shock], 
 	csm_powerlaw_prefactor [normalization factor for CSM density profile], 
 	csm_powerlaw_index [index of powerlaw CSM profile], 
-	ejecta_index [powerlaw index for the ejecta density distribution \rho ~ (\gamma\beta)^-n, ONLY integer n = 0, 1, 2 are possible, other values are NOT SUPPORTED]
+	#ejecta_index [powerlaw index for the ejecta density distribution $rho ~ (Gamma * beta)^-n$, ONLY integer n = 0, 1, 2 are possible, other values are NOT SUPPORTED]
 	OUTPUTS:
 	time [array contianing the timestamps of the lightcurve in the restframe],
 	Luminosity_bolometric [bolometric luminosity of light curve],
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 	Radius_initial = 2.*R_sun_cm # in cm
 	csm_powerlaw_prefactor = 4e16 # Parameter A .CSM power law is rho ~ A r^(-n). in cgs units
 	csm_powerlaw_index = 2.0 # parameter n. CSM power law is rho ~ A r^(-n). floating point number between 0 < n < 3 should be reasonable
-	ejecta_index = 0 # ejecta power law is rho ~ (\Gamma\beta)^(-n_eje). Integer n = 0, 1, 2. Other values are NOT SUPPORTED
+	ejecta_index = 0 # ejecta power law is rho ~ (Gamma * beta)^(-n_eje). Integer n = 0, 1, 2. Other values are NOT SUPPORTED
 
 	time, Luminosity_bolometric, radius_photosphere, velocity_shock, eta_thermal_coupling_coefficient, Temperature_blackbody, Temperature_colour, optical_depth_shock_electron_scattering = interface_single_sms_lightcurve(Ekin_ejecta, Mass_ejecta, Radius_initial, csm_powerlaw_prefactor, csm_powerlaw_index, ejecta_index)
 
