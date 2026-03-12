@@ -387,6 +387,9 @@ class SMSlightcurve_sphericalCSMshock:
     CSM_power_law_exponent = 2 # all solutions match at the match radius
     CSM_match_radius_codeunit = 0.1*parsec / c0
     CSM_density_prefactor = 1.0 # multiply CSM density with a factor
+    # for CSM of type rho(r) = A * r^{-n}
+    use_CSM_powerlaw_simple = False
+    CSM_powerlaw_simple_prefactor_cgs = 1.0
     #
     t_ion = 1e20 # ionization time [seconds]
     t_plateau = 0. # length of the plateau phase [seconds]
@@ -491,6 +494,10 @@ class SMSlightcurve_sphericalCSMshock:
             # compute density from there on:
             density = density_mr * (self.CSM_match_radius_codeunit/r)**(self.CSM_power_law_exponent)
             velocity = velocity_mr * (self.CSM_match_radius_codeunit/r)**(2-self.CSM_power_law_exponent)
+        if self.use_CSM_powerlaw_simple:
+            CSM_powerlaw_simple_prefactor_codeunit = self.CSM_powerlaw_simple_prefactor_cgs * (self.c0)**(3.-self.CSM_power_law_exponent)  # convert from cgs to units of c=1
+            density = CSM_powerlaw_simple_prefactor_codeunit * r**(-self.CSM_power_law_exponent) # in unts of c=1
+            velocity = 1e-5 # in unts of c=1
         # to reproduce suzuki paper:
         if self.debug_Suzuki:
             Aconst = self.Aconst_star * 5e11 * self.c0 # in g/cm to g/ls
@@ -809,7 +816,7 @@ class SMSlightcurve_sphericalCSMshock:
     #---------------------------------------------------------
     # integrator initial conditions:
     def get_init_conditions(self, init_stepsize):
-        Sr = 0.; Msh = 0.; Rs = self.R0; Rfs = self.R0*(1.+1e-10); Rrs = self.R0*(1.-1e-10); Eint_sh = 0.
+        Sr = 0.; Msh = 0.; Rs = self.R0; Rfs = self.R0*(1.+1e-6); Rrs = self.R0*(1.-1e-6); Eint_sh = 0.
         # compute some important initial parameters:
         if self.debug_Suzuki:
             # compute rho0 from Erel:
@@ -905,8 +912,8 @@ class SMSlightcurve_sphericalCSMshock:
         Eint_sh_init = 1e5 / self.c0**2 # erg/c^2
         # initial radii:
         Rs_init = self.R0
-        Rfs_init = self.R0 *(1.+1e-10)  # add small difference for numerical stability reasons
-        Rrs_init = self.R0 *(1.-1e-10)
+        Rfs_init = self.R0 *(1.+1e-6)  # add small difference for numerical stability reasons
+        Rrs_init = self.R0 *(1.-1e-6)
         #
         if self.debug:
             print("beta_s ", str(beta_s))
@@ -937,7 +944,7 @@ class SMSlightcurve_sphericalCSMshock:
             beta_max = np.sqrt(1.- 1./(self.Gamma_max**2) )
             self.R0 = self.t0 *beta_max
         #
-        init_stepsize = 1e-10 # 1e-10 seconds
+        init_stepsize = self.t0/1e6 #1e-10 # 1e-10 seconds
         y_init = self.get_init_conditions(init_stepsize)
         if self.debug: print(y_init)
         timespan = [self.t0, self.max_integration_time]
@@ -971,7 +978,7 @@ class SMSlightcurve_sphericalCSMshock:
         #timespan = [self.t_ion, self.max_integration_time]
         print("timespans:", self.t_shock_transparent, " ", self.max_integration_time)
         if self.max_integration_time < self.t_shock_transparent: return # failsafe in case max integration time happens before t_ion
-        if self.stop_after_opt_thick_phase: self.max_integration_time = self.t_shock_transparent + 10*self.day
+        if self.stop_after_opt_thick_phase: self.max_integration_time = self.t_shock_transparent * 1.01
         timespan_plateau_phase = [self.t_shock_transparent, self.max_integration_time]
         y_init = self.get_init_conditions_for_next_phase(result_arrs)
 
