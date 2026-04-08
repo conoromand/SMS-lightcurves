@@ -1630,8 +1630,35 @@ class Telescope_filter:
             self.filter_transmissivity = 1.0
             self.filter_magnitude_bound = 29.4 # RST SN medium/deep survey: mag H = 28.1 / H = 29.4
             return
+        ##### ZTF camera filters: (Zwicky Transient Facility)
+        if self.filter_name == "ZTF_g_band": # ZTF g-band filter
+            self.nu_min = 5.4887e14; self.nu_max = 7.2326e14 # (414.5-546.2) nanometers converted to Hz (50% cut-on and cut-off)
+            self.filter_transmissivity = 0.9
+            self.filter_magnitude_bound = 24.0 # magnitude bounds depends on exposure time
+            return
+        if self.filter_name == "ZTF_r_band": # ZTF r-band filter
+            self.nu_min = 4.1573e14; self.nu_max = 5.3005e14 # (565.59-721.13) nanometers converted to Hz (50% cut-on and cut-off)
+            self.filter_transmissivity = 0.95
+            self.filter_magnitude_bound = 24.0 # magnitude bounds depends on exposure time
+            return
+        if self.filter_name == "ZTF_i_band": # ZTF i-band filter
+            self.nu_min = 3.4333e14; self.nu_max = 4.1574e14 # (721.1-873.2) nanometers converted to Hz (50% cut-on and cut-off)
+            self.filter_transmissivity = 0.997
+            self.filter_magnitude_bound = 24.0 # magnitude bounds depends on exposure time
+            return
+        ##### ATLAS camera filters: (ATLAS Telescope)
+        if self.filter_name == "ATLAS_cyan_band": # ATLAS cyan-band filter
+            self.nu_min = 4.612e14; self.nu_max = 7.138e14 # (420-650) nanometers converted to Hz (50% cut-on and cut-off)
+            self.filter_transmissivity = 0.6
+            self.filter_magnitude_bound = 19.7 # for 30 sec 5sigma exposure time
+            return
+        if self.filter_name == "ATLAS_orange_band": # ATLAS orange-band filter
+            self.nu_min = 3.656e14; self.nu_max = 5.353e14 # (560-820) nanometers converted to Hz (50% cut-on and cut-off)
+            self.filter_transmissivity = 0.6
+            self.filter_magnitude_bound = 19.7 # for 30 sec 5sigma exposure time
+            return
         print("Non-standard filter. Proceed with caution. Pre-implemented filters are:")
-        print('"JWST_NIRCam_F150W2", "JWST_NIRCam_F322W2", "JWST_NIRCam_F444W", "JWST_NIRCam_F090W", "JWST_NIRCam_F200W", "EUCLID_NISP_Hband", "EUCLID_NISP_Jband", "EUCLID_NISP_Yband"')
+        print('"JWST_NIRCam_F150W2", "JWST_NIRCam_F322W2", "JWST_NIRCam_F444W", "JWST_NIRCam_F090W", "JWST_NIRCam_F200W", "EUCLID_NISP_Hband", "EUCLID_NISP_Jband", "EUCLID_NISP_Yband", "ROMAN_WFI_Jband", "ROMAN_WFI_Hband", "ZTF_g_band", "ZTF_r_band", "ZTF_i_band", "ATLAS_cyan_band", "ATLAS_orange_band"')
 
 
     def filter_function(self, nu_in):
@@ -1655,6 +1682,14 @@ class Telescope_filter:
 
     # Roman space telescope:
     # filter data: https://arxiv.org/pdf/1305.5422 Table 2-1
+
+    # Zwicky Transient Facility
+    # filter data: https://iopscience.iop.org/article/10.1088/1538-3873/ab4ca2/pdf figure 5
+    # and https://github.com/ZwickyTransientFacility/ztf_information in folder filter_transmission
+
+    # ATLAS telescope
+    # telescope website: https://atlas.fallingstar.com/specifications.php
+    # filter functions https://www.researchgate.net/publication/346785832_Asteroid_phase_curves_from_ATLAS_dual-band_photometry figure 1
     '''
 
 
