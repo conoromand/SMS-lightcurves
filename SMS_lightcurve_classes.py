@@ -1730,6 +1730,7 @@ class ABmagnitude_lightcurve:
     # containers for outputs/inputs over time
     time_arr = np.array(0.)
     ABmag_arr = np.array(0.)
+    Flux_arr = np.array(0.) # flux in Jansky
     Lbol_arr = np.array(0.)
     Temp_surf_color_arr = np.array(0.)
     Temp_surf_BB_arr = np.array(0.)
@@ -1838,10 +1839,12 @@ class ABmagnitude_lightcurve:
                 attenuation = np.exp(-tau_Balmer)
             return ( attenuation*self.spectral_radiance_B_nu(nu_in*(1.+self.z_redshift), T_eff_in) * self.Gunn_Peterson_through(nu_in) / nu_in )
 
-        normalization_integral = 1.
-        def normalization_integrand(nu_in):
-            return ( 3631.*self.Jansky / nu_in )
-        normalization_integral, err1 = integrate.quad(normalization_integrand, nu_min, nu_max, epsabs=1e-13, epsrel=1e-13)
+        #normalization_integral = 1.
+        #def normalization_integrand(nu_in):
+        #    return ( 3631.*self.Jansky / nu_in )
+        #normalization_integral, err1 = integrate.quad(normalization_integrand, nu_min, nu_max, epsabs=1e-13, epsrel=1e-13)
+        #normalization integral is known analytically for step-function telescpe filters:
+        normalization_integral = np.log(nu_max/nu_min) * 3631.*self.Jansky
         
         mag_AB = np.zeros(len(self.time_arr))
         for k in range(len(self.time_arr)):
@@ -1853,8 +1856,10 @@ class ABmagnitude_lightcurve:
             mag_AB[k] = -2.5*np.log10(flux_integral/normalization_integral) - 2.5*np.log10(np.pi*pow(1.+self.z_redshift,1)) -5.0*np.log10(self.Rphotosphere_arr[k]) + 5.0*np.log10(self.d_lum)
             if mag_AB[k] > 100: mag_AB[k] = 100. # clamp magnitude value to avoid spurious reuslts
             flux_integral_arr[k] = flux_integral
-        # finally assign the AB magnitude reults to the results array:
+        # finally assign the AB magnitude + radiation flux reults to the results array:
         self.ABmag_arr = mag_AB
+        self.Flux_arr = 10**(-mag_AB/2.5) * normalization_integral # in Jansky
+        #
         if self.debug:
             print(normalization_integral)
             #print(flux_integral_arr)
