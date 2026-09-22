@@ -356,6 +356,7 @@ class SMSlightcurve_sphericalCSMshock:
     sigma = 5.670374419e-5 # Stefan Boltzmann constant in cgs units [erg/s / cm^2 / K^4]
     c0 = 2.998e10 # speed of light [cm/s]
     kB = 1.38065e-16 # in erg/K
+    h = 6.626176e-27 # in erg*s
     m_Hydrogen = 1.6738e-24 # mean molecular wheight of atomic hydrogen [gram]
     G = 6.674e-8 # gravitational constant [cm^3/g/s^2]
     M_sun_gram = 1.988e33
@@ -451,6 +452,7 @@ class SMSlightcurve_sphericalCSMshock:
     # quantities related to non-thermal effects in the spectrum: see Nakar&Sari 2010: https://iopscience.iop.org/article/10.1088/0004-637X/725/1/904/pdf
     eta_factor_arr = np.array(0.) # ratio between needed Photons in BlackBody vs produced photons. spectrum is modified if >1
     y_max_arr = np.array(0.) # related to minimum frequency for Comptonization
+    nu_absorption_ff = np.array(0.) # critical apsorption frequency by free-free process
     
     # integrator setings
     max_integration_time = 1000.* day
@@ -1065,6 +1067,7 @@ class SMSlightcurve_sphericalCSMshock:
         # fill non-thermla values into arrays:
         self.eta_factor_arr = eta_factor_i
         self.y_max_arr = y_max_i
+        self.nu_absorption_ff =  (self.kB*T_BB_surface_i)**(7./4.) / (self.kB*T_e_surface_i)**(3./4.) / np.sqrt(eta_factor_i) / self.h # approximately correct (within factor 1-2)
 
 
         ''' old/obsolete code:
@@ -1254,6 +1257,8 @@ class SMSlightcurve_sphericalCSMshock:
         #
         self.eta_factor_arr = np.append(self.eta_factor_arr, eta_factor_i)
         self.y_max_arr = np.append(self.y_max_arr, y_max_i)
+        nu_absorb_i = (self.kB*T_BB_bulk_i)**(7./4.) / (self.kB*T_e_bulk_i)**(3./4.) / np.sqrt(eta_factor_i) / self.h # approximately correct (within factor 1-2)
+        self.nu_absorption_ff = np.append(self.nu_absorption_ff, nu_absorb_i)
         # shock bulk tempertures (even though the shock is now transparent we need something to fill the array):
         self.shock_Temp_internal_electron_arr = np.append(self.shock_Temp_internal_electron_arr, T_e_bulk_i)
         self.shock_Temp_internal_arr = np.append(self.shock_Temp_internal_arr, T_BB_bulk_i)
@@ -1705,6 +1710,7 @@ class ABmagnitude_lightcurve:
     z_redshift= 1.
     use_GP_through = True # (should stay on per default) whether to include Gunn-Peterson through: https://en.wikipedia.org/wiki/Gunn%E2%80%93Peterson_trough
     use_Balmer_attenuation = False
+    use_Irwin_spectrum = False
     telescope_filter = None # Telescope_filter object
     d_lum = 1. # luminosity distance in cm
     # cosmology:
@@ -1735,6 +1741,8 @@ class ABmagnitude_lightcurve:
     Temp_surf_color_arr = np.array(0.)
     Temp_surf_BB_arr = np.array(0.)
     Rphotosphere_arr = np.array(0.)
+    tau_shock = np.array(0.)
+    nu_absorption_ff = np.array(0.)
 
     # constructor
     def __init__(self, SMS_lightcurve, z_redshift_in, telescope_filter_in):
@@ -1746,35 +1754,43 @@ class ABmagnitude_lightcurve:
         self.Temp_surf_color_arr = SMS_lightcurve.Temp_eff_arr
         self.Temp_surf_BB_arr = SMS_lightcurve.Temp_BB_surface
         self.Rphotosphere_arr = SMS_lightcurve.Rphotosphere_arr
+        self.tau_shock = SMS_lightcurve.optical_depth_shock_arr
+        self.nu_absorption_ff = SMS_lightcurve.nu_absorption_ff
     
     #---------------------------------------------------------
     # functions to compute radiation related quantities:
     @staticmethod
-    def spectral_radiance_B_nu(nu, T):
+    def spectral_radiance_B_nu(nu, T): # blackbody spectrum
         c0 = 2.998e10 # speed of light in cm/s
         h = 6.626176e-27 # in erg*s
         kB = 1.38065e-16 # in erg/K
         return ( 2.*h*pow(nu,3) / pow(c0,2) / (np.exp(h*nu/ (kB*T)) -1. ))
-    
-    @staticmethod
-    def modified_blackBody_B_nu(nu, T):
-        c0 = 2.998e10 # speed of light in cm/s
-        h = 6.626176e-27 # in erg*s
-        kB = 1.38065e-16 # in erg/K
-        kappa_es = 0.35 # electron scattering opacity i.e. Thompson opacity
-        kappa_ff = 1. # free-free opacity, i.e. Bremsstrahlung
-        return 2.*( 2.*h*pow(nu,3) / pow(c0,2) / (np.exp(h*nu/ (kB*T)) -1. )) / (1.+ np.sqrt( 1. + kappa_es / kappa_ff ))
 
     @staticmethod
-    def spectral_radiance_B_lambda(wavelength, T):
+    def Irwin_spectrum_radiance_I_nu(nu, T, k, self):
+        # according to the paper: academic.oup.com/mnras/article/543/3/2917/8262825 Eq. 71-74
         c0 = 2.998e10 # speed of light in cm/s
         h = 6.626176e-27 # in erg*s
         kB = 1.38065e-16 # in erg/K
-        return ( 2.*h*pow(c0,2) / pow(wavelength,5) / (np.exp(h*c0/ (wavelength*kB*T)) -1. ))
+        #
+        nu_a_ff = self.nu_absorption_ff[k]
+        #
+        x_nu = h*nu/(kB*T)
+        x_nu_a_ff = h*nu_a_ff/(kB*T)
+        if x_nu_a_ff > 50: x_nu_a_ff = 50
+        if x_nu_a_ff < 1e-8: x_nu_a_ff = 1e-8
+        #if x_nu > 50: x_nu = 50
+        #if x_nu < 1e-6: x_nu = 1e-6
+        #print(h*nu_a_ff/(kB*T))
+        tau_nu_ff = (x_nu_a_ff/x_nu)**3 * (np.exp(x_nu) - 1. )/(np.exp(x_nu_a_ff) - 1. ) * np.exp(x_nu_a_ff/3.92) * np.exp(-x_nu/3.92)
+        #
+        prefactor = (1. - np.exp(-tau_nu_ff))
+        radiance = prefactor * self.spectral_radiance_B_nu(x_nu*kB*T/h, T)
+        return (radiance)
 
     def Gunn_Peterson_through(self, nu_obs): # absorption due to intergalactic unionized Hydrogen
         # blocks all frequencies larger than Lyman lines at redshift higher than 5 or 6
-        if self.use_GP_through:
+        if self.use_GP_through and self.z_redshift > 5.:
             nu_Lymanalpha = 2.466067546e15 # Lyman alpha line in the rest frame of the emitter in Hz
             # check if nu_obs is larger than Lyman-alpha and then exclude all frequencies where this is the case
             if nu_obs*(1. + self.z_redshift) > nu_Lymanalpha:
@@ -1825,35 +1841,52 @@ class ABmagnitude_lightcurve:
         # compute the flux as F_nu = pi* I_nu * (R/d_lum)^2 , where: I_nu = spectral radiance B_nu
 	    # need to do this for every time step and then compute the AB magnitude
 	    # flux at a specific time as a function of frequency nu (in the observer frame!):
-		# full integrand: F_nu_obs = np.pi*pow(R_obj/d_lum,2) * spectral_radiance_B_nu(nu_obs*(1.+z), T_eff_in) / pow(1.+z,3)
+		# full integrand: F_nu_obs = np.pi*(1+z)*pow(R_obj/d_lum,2) * spectral_radiance_B_nu(nu_obs*(1+z), T_eff_in)
         # so we dont need to do many multiplications withing the integrator, the frequency-independent terms have been taken out of the interand
         # TODO: for now, only step-function filter functions are implemented. one could also implement arbitrary filter functions at a later date 
         flux_integral = 1.
-        def flux_integrand(nu_in, T_eff_in, k, self): # == F_nu_obs / nu_obs
-            attenuation = 1.0
-            if self.use_Balmer_attenuation: # include possible effects of almer absorption:
-                f21 = 1e-7 # fraction of unionized hydrogen atoms with electron in n=2 exited state
-                sigma_bf = 9.5e-18* ( nu_Balmer_obs/nu_in )**3 # bound-free cross-section
-                if nu_in < nu_Balmer_obs: sigma_bf = 0.0 #no Balmer absorption for lower-frequency photons
-                tau_Balmer = sigma_bf * f21 * (1.904e42) / self.Rphotosphere_arr[k] # Balmer opacity
-                attenuation = np.exp(-tau_Balmer)
-            return ( attenuation*self.spectral_radiance_B_nu(nu_in*(1.+self.z_redshift), T_eff_in) * self.Gunn_Peterson_through(nu_in) / nu_in )
-
+        def radiance_integrand(nu_in, T_eff_in, k, self): # == F_nu_obs / nu_obs
+            return ( self.spectral_radiance_B_nu(nu_in*(1.+self.z_redshift), T_eff_in) * self.Gunn_Peterson_through(nu_in) / nu_in )
+        def radiance_integrand_Irwin(nu_in, T_eff_in, k, self): # == F_nu_obs / nu_obs
+            return ( self.Irwin_spectrum_radiance_I_nu(nu_in*(1.+self.z_redshift), T_eff_in, k, self) * self.Gunn_Peterson_through(nu_in) / nu_in )
+        
         #normalization_integral = 1.
         #def normalization_integrand(nu_in):
         #    return ( 3631.*self.Jansky / nu_in )
         #normalization_integral, err1 = integrate.quad(normalization_integrand, nu_min, nu_max, epsabs=1e-13, epsrel=1e-13)
-        #normalization integral is known analytically for step-function telescpe filters:
+        #normalization integral is known analytically for step-function telescope filters:
         normalization_integral = np.log(nu_max/nu_min) * 3631.*self.Jansky
         
         mag_AB = np.zeros(len(self.time_arr))
+        # compute AB magnitude for every time step k:
         for k in range(len(self.time_arr)):
-            # compute AB magnitude for every time step k:
-            flux_integral, err2 = integrate.quad( flux_integrand, nu_min, nu_max, args=(self.Temp_surf_color_arr[k], k, self,), epsabs=1e-13, epsrel=1e-13, points=(nu_Lymanalpha_obs, nu_Balmer_obs))
-            # apply correction for re-scaled blackbody in case of non-equilibrium radiation effects: rescaledBB is B_nu(T_color)*(T_BB/T_color)^4 = B_nu(T_color)*L_bol/(4pi*R^2*sigma*T_color^4):
-            flux_integral = flux_integral* min(1., (self.Temp_surf_BB_arr[k]/self.Temp_surf_color_arr[k])**4)
+            # compute flux from integrating over radiance:
+            if self.use_Irwin_spectrum:
+                h = 6.626176e-27 # in erg*s
+                kB = 1.38065e-16 # in erg/K
+                x_nu = self.Temp_surf_color_arr[k]*kB/h
+                flux_integral, err2 = integrate.quad( radiance_integrand_Irwin, nu_min, nu_max, args=(self.Temp_surf_color_arr[k], k, self,), epsabs=1e-8, epsrel=1e-8, limit=200, points=(nu_Lymanalpha_obs, nu_Balmer_obs, self.nu_absorption_ff[k], x_nu, x_nu/3.92, x_nu*5, x_nu*10, x_nu*15.))
+                # re-scale the spectrum to conserve luminosity:
+                Lbol_Irwin_spectrum, err2 = integrate.quad( self.Irwin_spectrum_radiance_I_nu, x_nu*1e-10, x_nu*200., args=(self.Temp_surf_color_arr[k], k, self,), epsabs=1e-8, epsrel=1e-8, limit=200, points=(self.nu_absorption_ff[k], x_nu, x_nu/3.92, x_nu*5, x_nu*10, x_nu*15.))
+                Lbol_Irwin_spectrum = 16.*np.pi**2 * (self.Rphotosphere_arr[k])**2 / self.tau_shock[k] * Lbol_Irwin_spectrum
+                if k%500 == 0:
+                    #print("iteration: ", k)
+                    #print(self.nu_absorption_ff[k])
+                    #if k==15: exit()
+                    a=1
+                if Lbol_Irwin_spectrum < 1e10: Lbol_Irwin_spectrum = 1e10
+                flux_integral = flux_integral * (self.Lbol_arr[k] / Lbol_Irwin_spectrum)
+            else:
+                # use shifted BB spectrum:
+                flux_integral, err2 = integrate.quad( radiance_integrand, nu_min, nu_max, args=(self.Temp_surf_color_arr[k], k, self,), epsabs=1e-13, epsrel=1e-13, points=(nu_Lymanalpha_obs, nu_Balmer_obs))
+                # apply correction for re-scaled blackbody in case of non-equilibrium radiation effects: rescaledBB is B_nu(T_color)*(T_BB/T_color)^4 = B_nu(T_color)*L_bol/(4pi*R^2*sigma*T_color^4):
+                flux_integral = flux_integral* min(1., (self.Temp_surf_BB_arr[k]/self.Temp_surf_color_arr[k])**4)
+
             if flux_integral < 1e-40: flux_integral=1e-40
-            mag_AB[k] = -2.5*np.log10(flux_integral/normalization_integral) - 2.5*np.log10(np.pi*pow(1.+self.z_redshift,1)) -5.0*np.log10(self.Rphotosphere_arr[k]) + 5.0*np.log10(self.d_lum)
+            # convert radiance to flux:
+            flux_integral = np.pi*(1.+self.z_redshift) * (self.Rphotosphere_arr[k]/self.d_lum)**2 * flux_integral
+            
+            mag_AB[k] = -2.5*np.log10(flux_integral/normalization_integral) #- 2.5*np.log10(np.pi*pow(1.+self.z_redshift,1)) -5.0*np.log10(self.Rphotosphere_arr[k]) + 5.0*np.log10(self.d_lum)
             if mag_AB[k] > 100: mag_AB[k] = 100. # clamp magnitude value to avoid spurious reuslts
             flux_integral_arr[k] = flux_integral
         # finally assign the AB magnitude + radiation flux reults to the results array:
@@ -1866,3 +1899,29 @@ class ABmagnitude_lightcurve:
             #print(self.ABmag_arr)
             print(self.Lbol_arr)
 
+    #---------------------------------------------------------
+    # utility functions:
+    def write_spectrum_into_file(self, filename):
+
+        nu = np.geomspace(1e9,1e19, 300)
+        k = 300
+        T = self.Temp_surf_color_arr[k]
+        if self.use_Irwin_spectrum:
+            flux = self.Irwin_spectrum_radiance_I_nu(nu, T, k, self)
+        else:
+            flux = self.spectral_radiance_B_nu(nu, T)* min(1., (self.Temp_surf_BB_arr[k]/self.Temp_surf_color_arr[k])**4)
+
+        all_results = [nu, flux]
+        all_results_header = "nu  flux"
+        try:
+            with open(filename, 'w') as file:
+
+                file.write( "# " + all_results_header + '[cgs_units]\n') # header
+
+                for i in range(len(nu)):
+                    for element in all_results:
+                        file.write(str(element[i]) + ' ')
+                    file.write('\n') # line break
+            print(f"Array has been successfully written to {filename}")
+        except IOError:
+            print(f"An error occurred while writing to the file {filename}")

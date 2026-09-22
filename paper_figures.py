@@ -1731,8 +1731,8 @@ def tracks_EUCLID_Jband_Hband_vs_Hband_diagram_at_different_redshifts(figname, c
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -1812,8 +1812,8 @@ def tracks_EUCLID_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -1900,8 +1900,8 @@ def tracks_EUCLID_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -1983,8 +1983,8 @@ def tracks_EUCLID_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"EUCLID NISP $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"EUCLID NISP $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -2067,8 +2067,8 @@ def tracks_RST_Jband_Hband_vs_Hband_diagram_at_different_redshifts(figname, cut_
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("RST WFI $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"RST WFI $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -2148,8 +2148,8 @@ def tracks_RST_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_tic
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("RST WFI $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"RST WFI $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -2235,8 +2235,8 @@ def tracks_RST_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_tic
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("RST WFI $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"RST WFI $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
@@ -2317,8 +2317,8 @@ def tracks_RST_Jband_Hband_vs_Hband_diagram_at_different_redshifts_with_time_tic
 
 	model_name="FujH1"
 	plt.title("Colour magnitude diagram", fontsize=14) # add title to the whole plots
-	plt.xlabel("RST WFI $mag_\mathrm{H–band}$", fontsize=14)
-	plt.ylabel("RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
+	plt.xlabel(r"RST WFI $mag_\mathrm{H–band}$", fontsize=14)
+	plt.ylabel(r"RST WFI $mag_\mathrm{J–band}-mag_\mathrm{H–band}$", fontsize=14)
 	#max_xlim=xrange[1] # year
 	plt.xlim(17, 33) # AB magnitude
 	plt.ylim(-2,5) # AB magnitude
