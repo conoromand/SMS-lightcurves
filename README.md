@@ -8,9 +8,9 @@ This code is associated to the publication
 'Signatures of Exploding Supermassive PopIII Stars at High Redshift in JWST, EUCLID and Roman Space Telescope' Cédric Jockel et al. 2025,
 and is used to run the model descibed in the paper.
 
-The code was converted to a Reback plugin by Conor Omand.
+The code was converted to a Redback plugin by Conor Omand.
 
-## Usage
+## Usage (Non-plugin)
 To execute the code, simply run
     
     python3 paper_figures.py
