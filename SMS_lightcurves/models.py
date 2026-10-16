@@ -21,8 +21,8 @@ def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
     :param logeej: logarithm of the kinetic energy of the ejecta in erg s^-1
     :param logmej: logarithm of the ejecta mass in solar masses
     :param logr0: logarithm of the initial shock radius in cm
-    :param logA: logarithm of the normalization of csm density profile at 1e15 cm (rho ~ A (r/1e15 cm)^(-n_csm)) in g cm^-3
-    :param n_csm: power-law index of csm density profile (rho ~ A (r/1e15 cm)^(-n_csm))
+    :param logA: logarithm of the normalization of csm density profile at 1e10 cm (rho ~ A (r/1e10 cm)^(-n_csm)) in g cm^-3
+    :param n_csm: power-law index of csm density profile (rho ~ A (r/1e10 cm)^(-n_csm))
     :param n_ej: power-law index of ejecta density profile [NOTE: only values of 0, 1, and 2 are supported]
     :return: nametuple with the following properties
                 L_bol: bolometric luminosity in erg s^-1
@@ -40,8 +40,8 @@ def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
     e_ej = 10**logeej
     m_ej = 10**(logmej)
     r_0 = 10**logr0
-    A15 = 10**logA
-    A = A15 * (1e15)**n_csm
+    A10 = 10**logA
+    A = A10 * (1e10)**n_csm
     
     modelrun = SMSlightcurve_sphericalCSMshock_modified(e_ej, m_ej*solar_mass, r_0, Tion, opacity, n_density_in=n_ej)   
     
@@ -51,7 +51,7 @@ def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
     # set some integrator options, then integrate:
     modelrun.max_integration_time = 10.*365.24*day_to_s
     modelrun.max_timestep = 1.*day_to_s
-    modelrun.stop_after_opt_thick_phase = True
+    modelrun.stop_after_opt_thick_phase = False
     modelrun.integrate_model()
     
     #output = interface_single_sms_lightcurve(e_ej, m_ej*solar_mass, r_0, A, n_csm, n_ej)

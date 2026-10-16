@@ -37,13 +37,13 @@ def _prior_for_parameter(name):
     if name == "redshift":
         return _uniform(name, 1e-3, 3.0, label)
     if name == "logeej":
-        return _uniform(name, 51.0, 56.0, label)
+        return _uniform(name, 51.0, 55.0, label)
     if name == "logmej":
-        return _uniform(name, 2.0, 6.0, label)
+        return _uniform(name, 2.0, 5.0, label)
     if name == "logr0":
-        return _uniform(name, 13.0, 16.0, label)
+        return _uniform(name, 13.0, 15.0, label)
     if name == "logA":
-        return _uniform(name, -15.0, 0.0, label)
+        return _uniform(name, -2.0, 3.0, label)
     if name == "n_csm":
         return _uniform(name, 0.0, 3.0, label)       
     raise KeyError(f"No generated prior template for parameter '{name}'")

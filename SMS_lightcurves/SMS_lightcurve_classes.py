@@ -222,7 +222,7 @@ class SMSlightcurve_CSMdisk:
         timespan = [0., self.max_integration_time]
         init_stepsize = 1e-20 #seconds
         y_init = self.get_init_conditions(init_stepsize)
-        self.event_reach_Tion.terminal = True
+        self.event_reach_Tion.terminal = False
 
         result_arrs = integrate.solve_ivp(self.dy_dt_phase_initial, timespan, y_init, args=(self,), events=(self.event_reach_Tion), max_step=0.05*self.day, method="RK45")#, rtol=1e-7, atol=1e-10)
 
@@ -243,7 +243,7 @@ class SMSlightcurve_CSMdisk:
         if self.max_integration_time < self.t_ion: return # failsafe in case max integration time happens before t_ion
         timespan_plateau_phase = [self.t_ion, self.max_integration_time]
         y_init = self.get_init_conditions_t_ion(result_arrs)
-        self.event_zero_Rion.terminal = True
+        self.event_zero_Rion.terminal = False
 
         result_arrs_plateau = integrate.solve_ivp(self.dy_dt_phase_plateau, timespan_plateau_phase, y_init, args=(self,), events=(self.event_zero_Rion), max_step=0.05*self.day, method="RK45")
 
@@ -952,10 +952,10 @@ class SMSlightcurve_sphericalCSMshock:
         timespan = [self.t0, self.max_integration_time]
         
 
-        self.event_one_optical_depth.terminal = True # stop the integration when reaching event: True
+        self.event_one_optical_depth.terminal = False # stop the integration when reaching event: True
         self.event_one_optical_depth.direction = -1 # only trigger when going from tau>1 to tau<1
         #
-        self.event_negative_Eint_shock.terminal = True
+        self.event_negative_Eint_shock.terminal = False
         self.event_negative_Eint_shock.direction = -1
 
         # failsafe algorithm for csaes where shock is transparent initially: small test integration, as the spuious cases only fail in the 2nd time step
