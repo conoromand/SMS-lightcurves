@@ -14,13 +14,12 @@ from redback.sed import flux_density_to_spectrum as _flux_density_to_spectrum
 from astropy.cosmology import Planck18 as _cosmo
 
 @_citation_wrapper('https://ui.adsabs.harvard.edu/abs/2026MNRAS.545f1949J/abstract')
-def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
+def smssn_dynamics(time, logeej, logmej, logA, n_csm, **kwargs):
     """
     Explosion of a supermassive star interacting with optically thick CSM.
     :param time: time in days in source frame
     :param logeej: logarithm of the kinetic energy of the ejecta in erg s^-1
     :param logmej: logarithm of the ejecta mass in solar masses
-    :param logr0: logarithm of the initial shock radius in cm
     :param logA: logarithm of the normalization of csm density profile at 1e10 cm (rho ~ A (r/1e10 cm)^(-n_csm)) in g cm^-3
     :param n_csm: power-law index of csm density profile (rho ~ A (r/1e10 cm)^(-n_csm))
     :param n_ej: power-law index of ejecta density profile [NOTE: only values of 0, 1, and 2 are supported]
@@ -36,10 +35,10 @@ def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
     """   
     opacity = 0.35
     Tion = 6000.0 
+    r_0 = 1.0e12
     n_ej = kwargs.get('n_ej', 0)
     e_ej = 10**logeej
     m_ej = 10**(logmej)
-    r_0 = 10**logr0
     A10 = 10**logA
     A = A10 * (1e10)**n_csm
     
@@ -78,30 +77,28 @@ def smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
     return dynamics_output
 
 @_citation_wrapper('https://ui.adsabs.harvard.edu/abs/2026MNRAS.545f1949J/abstract')
-def smssn_bolometric(time, logeej, logmej, logr0, logA, n_csm, **kwargs):
+def smssn_bolometric(time, logeej, logmej, logA, n_csm, **kwargs):
     """
     Explosion of a supermassive star interacting with optically thick CSM.
     :param time: time in days in source frame
     :param logeej: logarithm of the kinetic energy of the ejecta in erg s^-1
     :param logmej: logarithm of the ejecta mass in solar masses
-    :param logr0: logarithm of the initial shock radius in cm
     :param logA: logarithm of the normalization of csm density profile at 1e15 cm (rho ~ A (r/1e15 cm)^(-n_csm)) in g cm^-3
     :param n_csm: power-law index of csm density profile (rho ~ A (r/1e15 cm)^(-n_csm))
     :param n_ej: power-law index of ejecta density profile [NOTE: only values of 0, 1, and 2 are supported]
     :return: bolometric luminosity
     """
-    output = smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs)
+    output = smssn_dynamics(time, logeej, logmej, logA, n_csm, **kwargs)
     return output.L_bol
 
 @_citation_wrapper('https://ui.adsabs.harvard.edu/abs/2026MNRAS.545f1949J/abstract')
-def smssn_blackbody(time, redshift,logeej, logmej, logr0, logA, n_csm, **kwargs):
+def smssn_blackbody(time, redshift,logeej, logmej, logA, n_csm, **kwargs):
     """
     Explosion of a supermassive star interacting with optically thick CSM.
     :param time: time in days in observer frame
     :param redshift: redshift of the source
     :param logeej: logarithm of the kinetic energy of the ejecta in erg s^-1
     :param logmej: logarithm of the ejecta mass in solar masses
-    :param logr0: logarithm of the initial shock radius in cm
     :param logA: logarithm of the normalization of csm density profile at 1e15 cm (rho ~ A (r/1e15 cm)^(-n_csm)) in g cm^-3
     :param n_csm: power-law index of csm density profile (rho ~ A (r/1e15 cm)^(-n_csm))
     :param n_ej: power-law index of ejecta density profile [NOTE: only values of 0, 1, and 2 are supported]
@@ -113,7 +110,7 @@ def smssn_blackbody(time, redshift,logeej, logmej, logr0, logA, n_csm, **kwargs)
     if kwargs['output_format'] == 'flux_density':
         frequency = kwargs['frequency']
         frequency, time = _calc_kcorrected_properties(frequency=frequency, redshift=redshift, time=time)
-        output = smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs)
+        output = smssn_dynamics(time, logeej, logmej, logA, n_csm, **kwargs)
         sed_1 = kwargs['sed'](time=time, luminosity=output.L_bol, temperature=output.T_col,
                                               r_photosphere=output.R_phot, frequency=frequency, luminosity_distance=dl)
         flux_density = sed_1.flux_density
@@ -125,7 +122,7 @@ def smssn_blackbody(time, redshift,logeej, logmej, logr0, logA, n_csm, **kwargs)
         time_observer_frame = time_temp * (1. + redshift)
         frequency, time = _calc_kcorrected_properties(frequency=_lambda_to_nu(lambda_observer_frame),
                                                      redshift=redshift, time=time_observer_frame)
-        output = smssn_dynamics(time, logeej, logmej, logr0, logA, n_csm, **kwargs)
+        output = smssn_dynamics(time, logeej, logmej, logA, n_csm, **kwargs)
         sed_1 = kwargs['sed'](temperature=output.T_col, r_photosphere=output.R_phot,
                               frequency=frequency[:,None], luminosity_distance=dl)
         fmjy = sed_1.flux_density.T

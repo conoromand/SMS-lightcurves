@@ -39,9 +39,7 @@ def _prior_for_parameter(name):
     if name == "logeej":
         return _uniform(name, 51.0, 55.0, label)
     if name == "logmej":
-        return _uniform(name, 2.0, 5.0, label)
-    if name == "logr0":
-        return _uniform(name, 13.0, 15.0, label)
+        return _uniform(name, 3.0, 5.0, label)
     if name == "logA":
         return _uniform(name, -2.0, 3.0, label)
     if name == "n_csm":
